@@ -9,7 +9,6 @@ const getCategories = asyncHandler(async (req, res) => {
 	const page = req.query.page * 1 || 1;
 	const limit = req.query.limit * 1 || 5;
 	const skip = (page - 1) * limit;
-	console.log(page, limit);
 
 	const categories = await Category.find({}).skip(skip).limit(limit);
 	res.status(200).json({ results: categories.length, page, data: categories });
@@ -36,8 +35,40 @@ const createCategory = asyncHandler(async (req, res) => {
 	res.status(201).json({ data: category });
 });
 
+// @desc update category
+// @route POST /api/v1/categories/:id
+// @access Private
+const updateCategory = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const { name } = req.body;
+
+	const category = await Category.findByIdAndUpdate(
+		id,
+		{ name },
+		{ new: true }
+	);
+	if (!category)
+		res.status(404).json({ message: "No Category found by this id" });
+
+	res.status(200).json({ data: category });
+});
+
+// @desc delete category
+// @route DELETE /api/v1/categories/:id
+// @access Private
+const deleteCategory = asyncHandler(async (req, res) => {
+	const { id } = req.params;
+	const category = await Category.findByIdAndDelete(id);
+	if (!category)
+		res.status(404).json({ message: "No Category found by this id" });
+
+	res.status(204).json({ message: "Category deleted" });
+});
+
 module.exports = {
 	getCategories,
 	createCategory,
 	getCategory,
+	updateCategory,
+	deleteCategory,
 };
