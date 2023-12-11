@@ -4,8 +4,8 @@
 	"description": "ecommerce shop api",
 	"main": "server.js",
 	"scripts": {
-		"start": "nodemon server.js",
-		"test": "jest"
+		"start:dev": "nodemon server.js",
+		"start:prod": "set NODE_ENV=production && node server.js"
 	},
 	"repository": {
 		"type": "git",
