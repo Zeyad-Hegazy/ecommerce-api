@@ -9,7 +9,6 @@ const getCategoryValidator = [
 
 const createCategoryValidator = [
 	body("name")
-		.isAlpha()
 		.notEmpty()
 		.withMessage("The name should contain only letters and should be unique.")
 		.custom(async (value) => {
@@ -24,11 +23,8 @@ const createCategoryValidator = [
 ];
 
 const updateCategoryValidator = [
-	param("id")
-		.isMongoId.withMessage("Invalid category id format")
-		.body("name")
-		.notEmpty()
-		.isAlpha(),
+	param("id").isMongoId().withMessage("Invalid category id format"),
+	body("name").notEmpty().isAlpha(),
 	validatorMiddleware,
 ];
 

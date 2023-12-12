@@ -8,6 +8,7 @@ const dbConnection = require("./config/database");
 const ApiError = require("./util/apiError");
 const globalError = require("./middlewares/errorMiddleware");
 const categoreyRouter = require("./routes/CategoryRoute");
+const subCategoryRouter = require("./routes/SubCategoryRoute");
 
 dbConnection();
 
@@ -21,6 +22,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 app.use("/api/v1/categories", categoreyRouter);
+app.use("/api/v1/subCategories", subCategoryRouter);
 
 app.all("*", (req, res, next) => {
 	next(new ApiError(`Can't find this route ${req.originalUrl}`, 400));
