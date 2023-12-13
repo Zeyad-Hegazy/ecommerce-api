@@ -1,14 +1,14 @@
 const SubCategory = require("../../models/SubCategoryModel");
-const { param, body } = require("express-validator");
+const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 
-// const getCategoryValidator = [
-// 	param("id").isMongoId().withMessage("Invalid category id format"),
-// 	validatorMiddleware,
-// ];
+const getSubCategoryValidator = [
+	check("id").isMongoId().withMessage("Invalid category id format"),
+	validatorMiddleware,
+];
 
 const createSubCategoryValidator = [
-	body("name")
+	check("name")
 		.notEmpty()
 		.withMessage("The name should contain only letters and should be unique.")
 		.custom(async (value) => {
@@ -19,27 +19,24 @@ const createSubCategoryValidator = [
 		.withMessage("Too short subCategory name")
 		.isLength({ max: 32 })
 		.withMessage("Too long subCategory name"),
-	body("category").isMongoId().withMessage("Invalid category id format"),
+	check("category").isMongoId().withMessage("Invalid category id format"),
 	validatorMiddleware,
 ];
 
-// const updateCategoryValidator = [
-// 	param("id")
-// 		.isMongoId.withMessage("Invalid category id format")
-// 		.body("name")
-// 		.notEmpty()
-// 		.isAlpha(),
-// 	validatorMiddleware,
-// ];
+const updateSubCategoryValidator = [
+	check("id").isMongoId().withMessage("Invalid subCategory id format"),
+	check("name").notEmpty(),
+	validatorMiddleware,
+];
 
-// const deleteCategoryValidator = [
-// 	param("id").isMongoId().withMessage("Invalid category id format"),
-// 	validatorMiddleware,
-// ];
+const deleteSubCategoryValidator = [
+	check("id").isMongoId().withMessage("Invalid subCategory id format"),
+	validatorMiddleware,
+];
 
 module.exports = {
-	// getCategoryValidator,
+	getSubCategoryValidator,
 	createSubCategoryValidator,
-	// updateCategoryValidator,
-	// deleteCategoryValidator,
+	updateSubCategoryValidator,
+	deleteSubCategoryValidator,
 };

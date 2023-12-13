@@ -1,14 +1,14 @@
 const Category = require("../../models/CategoryModel");
-const { param, body } = require("express-validator");
+const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 
 const getCategoryValidator = [
-	param("id").isMongoId().withMessage("Invalid category id format"),
+	check("id").isMongoId().withMessage("Invalid category id format"),
 	validatorMiddleware,
 ];
 
 const createCategoryValidator = [
-	body("name")
+	check("name")
 		.notEmpty()
 		.withMessage("The name should contain only letters and should be unique.")
 		.custom(async (value) => {
@@ -23,13 +23,13 @@ const createCategoryValidator = [
 ];
 
 const updateCategoryValidator = [
-	param("id").isMongoId().withMessage("Invalid category id format"),
-	body("name").notEmpty().isAlpha(),
+	check("id").isMongoId().withMessage("Invalid category id format"),
+	check("name").notEmpty(),
 	validatorMiddleware,
 ];
 
 const deleteCategoryValidator = [
-	param("id").isMongoId().withMessage("Invalid category id format"),
+	check("id").isMongoId().withMessage("Invalid category id format"),
 	validatorMiddleware,
 ];
 

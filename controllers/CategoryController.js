@@ -4,7 +4,7 @@ const Category = require("../models/CategoryModel");
 const ApiError = require("../util/apiError");
 
 // @desc get list of categories
-// @route GET /api/v1/categories
+// @route GET /api/v1/categories?page=1&limit=5
 // @access Public
 const getCategories = asyncHandler(async (req, res) => {
 	const page = req.query.page * 1 || 1;
@@ -46,7 +46,7 @@ const updateCategory = asyncHandler(async (req, res, next) => {
 
 	const category = await Category.findByIdAndUpdate(
 		id,
-		{ name },
+		{ name, slug: slugify(name) },
 		{ new: true }
 	);
 	if (!category)
