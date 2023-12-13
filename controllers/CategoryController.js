@@ -65,7 +65,7 @@ const deleteCategory = asyncHandler(async (req, res, next) => {
 	if (!category)
 		return next(new ApiError(`No Category found by this id: ${id}`, 404));
 
-	res.status(204).json({ message: "Category deleted" });
+	res.status(200).json({ message: "Category deleted" });
 });
 
 module.exports = {
