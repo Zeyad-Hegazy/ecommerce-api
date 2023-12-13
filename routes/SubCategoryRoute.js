@@ -1,8 +1,10 @@
 const express = require("express");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const {
+	setCategoryIdToBody,
+	setFilterObject,
 	getSubCategories,
 	getSubCategory,
 	createSubCategory,
@@ -19,8 +21,8 @@ const {
 
 router
 	.route("/")
-	.get(getSubCategories)
-	.post(createSubCategoryValidator, createSubCategory);
+	.get(setFilterObject, getSubCategories)
+	.post(setCategoryIdToBody, createSubCategoryValidator, createSubCategory);
 
 router
 	.route("/:id")

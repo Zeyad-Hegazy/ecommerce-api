@@ -9,6 +9,14 @@ const setCategoryIdToBody = (req, res, next) => {
 	next();
 };
 
+// @desc set filteration on subcategories by it's pearent category
+const setFilterObject = (req, res, next) => {
+	let filterObject = {};
+	if (req.params.categoryId) filterObject = { category: req.params.categoryId };
+	req.filterObject = filterObject;
+	next();
+};
+
 // @desc get list of subCategories
 // @route GET /api/v1/subCategories?page=1&limit=5
 // @access Public
@@ -17,7 +25,9 @@ const getSubCategories = asyncHandler(async (req, res) => {
 	const limit = req.query.limit * 1 || 5;
 	const skip = (page - 1) * limit;
 
-	const subCategories = await SubCategory.find({}).skip(skip).limit(limit);
+	const subCategories = await SubCategory.find(req.filterObject)
+		.skip(skip)
+		.limit(limit);
 	res
 		.status(200)
 		.json({ results: subCategories.length, page, data: subCategories });
@@ -82,6 +92,7 @@ const deleteSubCategory = asyncHandler(async (req, res, next) => {
 
 module.exports = {
 	setCategoryIdToBody,
+	setFilterObject,
 	getSubCategories,
 	getSubCategory,
 	createSubCategory,
