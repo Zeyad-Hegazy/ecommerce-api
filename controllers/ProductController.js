@@ -11,7 +11,10 @@ const getProducts = asyncHandler(async (req, res) => {
 	const limit = req.query.limit * 1 || 5;
 	const skip = (page - 1) * limit;
 
-	const products = await Product.find({}).skip(skip).limit(limit);
+	const products = await Product.find({})
+		.skip(skip)
+		.limit(limit)
+		.populate({ path: "category", select: "name -_id" });
 	res.status(200).json({ results: products.length, page, data: products });
 });
 
@@ -20,8 +23,10 @@ const getProducts = asyncHandler(async (req, res) => {
 // @access Public
 const getProduct = asyncHandler(async (req, res, next) => {
 	const { id } = req.params;
-	const product = await Product.findById(id);
-
+	const product = await Product.findById(id).populate({
+		path: "category",
+		select: "name -_id",
+	});
 	if (!product)
 		return next(new ApiError(`No product found by this id: ${id}`, 404));
 
@@ -42,8 +47,9 @@ const createProduct = asyncHandler(async (req, res) => {
 // @access Private
 const updateProduct = asyncHandler(async (req, res, next) => {
 	const { id } = req.params;
-	req.body.slug = slugify(req.body.title);
-
+	if (req.body.title) {
+		req.body.slug = slugify(req.body.title);
+	}
 	const product = await Product.findByIdAndUpdate(id, req.body, { new: true });
 	if (!product)
 		return next(new ApiError(`No product found by this id: ${id}`, 404));

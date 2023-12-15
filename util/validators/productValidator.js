@@ -15,14 +15,14 @@ const createProductValidator = [
 			const existingProduct = await Product.findOne({ title: value });
 			if (existingProduct) throw new Error("product title must be unique");
 		})
-		.isLength({ min: 2 })
+		.isLength({ min: 5 })
 		.withMessage("Too short product title")
-		.isLength({ max: 32 })
+		.isLength({ max: 50 })
 		.withMessage("Too long product title"),
 	check("description")
 		.notEmpty()
 		.withMessage("Product description is required")
-		.isLength({ max: 200 })
+		.isLength({ max: 400 })
 		.withMessage("Too long description"),
 	check("quantity")
 		.notEmpty()
