@@ -3,6 +3,14 @@ const asyncHandler = require("express-async-handler");
 const Product = require("../models/ProductModel");
 const ApiError = require("../util/apiError");
 
+// @desc set filteration on products by it's pearent category
+const setFilterObject = (req, res, next) => {
+	let filterObject = {};
+	if (req.params.categoryId) filterObject = { category: req.params.categoryId };
+	req.filterObject = filterObject;
+	next();
+};
+
 // @desc get list of products
 // @route GET /api/v1/products?page=1&limit=5
 // @access Public
@@ -11,7 +19,7 @@ const getProducts = asyncHandler(async (req, res) => {
 	const limit = req.query.limit * 1 || 5;
 	const skip = (page - 1) * limit;
 
-	const products = await Product.find({})
+	const products = await Product.find(req.filterObject)
 		.skip(skip)
 		.limit(limit)
 		.populate({ path: "category", select: "name -_id" });
@@ -71,6 +79,7 @@ const deleteProduct = asyncHandler(async (req, res, next) => {
 });
 
 module.exports = {
+	setFilterObject,
 	getProducts,
 	getProduct,
 	createProduct,

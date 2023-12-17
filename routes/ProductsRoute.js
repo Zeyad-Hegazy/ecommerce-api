@@ -1,8 +1,9 @@
 const express = require("express");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const {
+	setFilterObject,
 	getProducts,
 	getProduct,
 	createProduct,
@@ -17,7 +18,10 @@ const {
 	deleteProductValidator,
 } = require("../util/validators/productValidator");
 
-router.route("/").get(getProducts).post(createProductValidator, createProduct);
+router
+	.route("/")
+	.get(setFilterObject, getProducts)
+	.post(createProductValidator, createProduct);
 
 router
 	.route("/:id")
