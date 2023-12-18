@@ -110,11 +110,15 @@ const createProductValidator = [
 	check("ratingsAverage")
 		.optional()
 		.isNumeric()
-		.withMessage("ratings Average must be a number")
-		.isLength({ min: 1 })
-		.withMessage("Product Average must be above or equal 1.0")
-		.isLength({ max: 5 })
-		.withMessage("Product Average must be below or equal 5.0"),
+		.withMessage("Product Average must be a number")
+		.custom((value) => {
+			const floatValue = parseFloat(value);
+			if (isNaN(floatValue)) {
+				throw new Error("Invalid number");
+			}
+			return floatValue >= 1 && floatValue <= 5;
+		})
+		.withMessage("Product Average must be between 1 and 5"),
 	check("ratingsQuantity")
 		.optional()
 		.isNumeric()
