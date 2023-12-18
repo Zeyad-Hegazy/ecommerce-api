@@ -12,17 +12,30 @@ const setFilterObject = (req, res, next) => {
 };
 
 // @desc get list of products
-// @route GET /api/v1/products?page=1&limit=5
+// @route GET /api/v1/products
 // @access Public
 const getProducts = asyncHandler(async (req, res) => {
+	const queryStringObject = { ...req.query };
+	const excludeFields = ["page", "limit", "sort", "fields"];
+	excludeFields.forEach((feild) => delete queryStringObject[feild]);
+
+	let queryStr = JSON.stringify(queryStringObject);
+	queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
 	const page = req.query.page * 1 || 1;
 	const limit = req.query.limit * 1 || 5;
 	const skip = (page - 1) * limit;
 
-	const products = await Product.find(req.filterObject)
+	const mongooseQuery = Product.find({
+		...req.filterObject,
+		...JSON.parse(queryStr),
+	})
 		.skip(skip)
 		.limit(limit)
 		.populate({ path: "category", select: "name -_id" });
+
+	const products = await mongooseQuery;
+
 	res.status(200).json({ results: products.length, page, data: products });
 });
 
