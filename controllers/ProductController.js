@@ -16,7 +16,7 @@ const setFilterObject = (req, res, next) => {
 // @access Public
 const getProducts = asyncHandler(async (req, res) => {
 	const queryStringObject = { ...req.query };
-	const excludeFields = ["page", "limit", "sort", "fields"];
+	const excludeFields = ["page", "limit", "sort", "fields", "keyword"];
 	excludeFields.forEach((feild) => delete queryStringObject[feild]);
 
 	let queryStr = JSON.stringify(queryStringObject);
@@ -35,8 +35,24 @@ const getProducts = asyncHandler(async (req, res) => {
 		.populate({ path: "category", select: "name -_id" });
 
 	if (req.query.sort) {
-		const sortQuery = req.query.sort.split(",").join(" ");
-		mongooseQuery = mongooseQuery.sort(sortQuery);
+		const sortBy = req.query.sort.split(",").join(" ");
+		mongooseQuery = mongooseQuery.sort(sortBy);
+	}
+
+	if (req.query.fields) {
+		const selectBy = req.query.fields.split(",").join(" ");
+		mongooseQuery = mongooseQuery.select(selectBy);
+	} else {
+		mongooseQuery = mongooseQuery.select("-__v");
+	}
+
+	if (req.query.keyword) {
+		const query = {};
+		query.$or = [
+			{ title: { $regex: req.query.keyword, $options: "i" } },
+			{ description: { $regex: req.query.keyword, $options: "i" } },
+		];
+		mongooseQuery = mongooseQuery.find(query);
 	}
 
 	const products = await mongooseQuery;
