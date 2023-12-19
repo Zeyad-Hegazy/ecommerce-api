@@ -26,13 +26,18 @@ const getProducts = asyncHandler(async (req, res) => {
 	const limit = req.query.limit * 1 || 5;
 	const skip = (page - 1) * limit;
 
-	const mongooseQuery = Product.find({
+	let mongooseQuery = Product.find({
 		...req.filterObject,
 		...JSON.parse(queryStr),
 	})
 		.skip(skip)
 		.limit(limit)
 		.populate({ path: "category", select: "name -_id" });
+
+	if (req.query.sort) {
+		const sortQuery = req.query.sort.split(",").join(" ");
+		mongooseQuery = mongooseQuery.sort(sortQuery);
+	}
 
 	const products = await mongooseQuery;
 
