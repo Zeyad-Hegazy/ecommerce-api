@@ -2,6 +2,7 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const Product = require("../models/ProductModel");
 const ApiError = require("../util/apiError");
+const ApiFeatures = require("../util/ApiFeatures");
 
 // @desc set filteration on products by it's pearent category
 const setFilterObject = (req, res, next) => {
@@ -15,49 +16,26 @@ const setFilterObject = (req, res, next) => {
 // @route GET /api/v1/products
 // @access Public
 const getProducts = asyncHandler(async (req, res) => {
-	const queryStringObject = { ...req.query };
-	const excludeFields = ["page", "limit", "sort", "fields", "keyword"];
-	excludeFields.forEach((feild) => delete queryStringObject[feild]);
+	const countDocuments = await Product.countDocuments();
+	const apiFeatures = new ApiFeatures(
+		Product.find(req.filterObject).populate({
+			path: "category",
+			select: "name -_id",
+		}),
+		req.query
+	)
+		.paginate(countDocuments)
+		.filter()
+		.sort()
+		.limitFields()
+		.search();
 
-	let queryStr = JSON.stringify(queryStringObject);
-	queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-	const page = req.query.page * 1 || 1;
-	const limit = req.query.limit * 1 || 5;
-	const skip = (page - 1) * limit;
-
-	let mongooseQuery = Product.find({
-		...req.filterObject,
-		...JSON.parse(queryStr),
-	})
-		.skip(skip)
-		.limit(limit)
-		.populate({ path: "category", select: "name -_id" });
-
-	if (req.query.sort) {
-		const sortBy = req.query.sort.split(",").join(" ");
-		mongooseQuery = mongooseQuery.sort(sortBy);
-	}
-
-	if (req.query.fields) {
-		const selectBy = req.query.fields.split(",").join(" ");
-		mongooseQuery = mongooseQuery.select(selectBy);
-	} else {
-		mongooseQuery = mongooseQuery.select("-__v");
-	}
-
-	if (req.query.keyword) {
-		const query = {};
-		query.$or = [
-			{ title: { $regex: req.query.keyword, $options: "i" } },
-			{ description: { $regex: req.query.keyword, $options: "i" } },
-		];
-		mongooseQuery = mongooseQuery.find(query);
-	}
-
+	const { mongooseQuery, paginationResult } = apiFeatures;
 	const products = await mongooseQuery;
 
-	res.status(200).json({ results: products.length, page, data: products });
+	res
+		.status(200)
+		.json({ results: products.length, paginationResult, data: products });
 });
 
 // @desc get single product by it's id
