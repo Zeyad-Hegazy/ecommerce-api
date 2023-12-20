@@ -2,6 +2,7 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const SubCategory = require("../models/SubCategoryModel");
 const ApiError = require("../util/apiError");
+const ApiFeatures = require("../util/ApiFeatures");
 
 // @desc if the main category name isn't sent with body access it form params
 const setCategoryIdToBody = (req, res, next) => {
@@ -21,16 +22,28 @@ const setFilterObject = (req, res, next) => {
 // @route GET /api/v1/subCategories?page=1&limit=5
 // @access Public
 const getSubCategories = asyncHandler(async (req, res) => {
-	const page = req.query.page * 1 || 1;
-	const limit = req.query.limit * 1 || 5;
-	const skip = (page - 1) * limit;
+	const countDocuments = await SubCategory.countDocuments();
+	const apiFeatures = new ApiFeatures(
+		SubCategory.find(req.filterObject),
+		req.query
+	)
+		.paginate(countDocuments)
+		.filter()
+		.sort()
+		.limitFields()
+		.search();
 
-	const subCategories = await SubCategory.find(req.filterObject)
-		.skip(skip)
-		.limit(limit);
+	const { mongooseQuery, paginationResult } = apiFeatures;
+
+	const subCategories = await mongooseQuery;
+
 	res
 		.status(200)
-		.json({ results: subCategories.length, page, data: subCategories });
+		.json({
+			results: subCategories.length,
+			paginationResult,
+			data: subCategories,
+		});
 });
 
 // @desc get single subCategory by it's id
