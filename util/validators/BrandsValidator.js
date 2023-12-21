@@ -1,3 +1,4 @@
+const slugify = require("slugify");
 const Brand = require("../../models/BrandModel");
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
@@ -17,6 +18,10 @@ const createBrandValidator = [
 			const existingBrand = await Brand.findOne({ name: value });
 			if (existingBrand) throw new Error("Brand name must be unique");
 		})
+		.custom((val, { req }) => {
+			req.body.slug = slugify(val);
+			return true;
+		})
 		.isLength({ min: 2 })
 		.withMessage("Too short brand name")
 		.isLength({ max: 32 })
@@ -26,7 +31,12 @@ const createBrandValidator = [
 
 const updateBrandValidator = [
 	check("id").isMongoId().withMessage("Invalid brand id format"),
-	check("name").notEmpty(),
+	check("name")
+		.optional()
+		.custom((val, { req }) => {
+			req.body.slug = slugify(val);
+			return true;
+		}),
 	validatorMiddleware,
 ];
 

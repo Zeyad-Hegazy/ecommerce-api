@@ -1,3 +1,4 @@
+const slugify = require("slugify");
 const SubCategory = require("../../models/SubCategoryModel");
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
@@ -15,6 +16,10 @@ const createSubCategoryValidator = [
 			const existingCategory = await SubCategory.findOne({ name: value });
 			if (existingCategory) throw new Error("SubCategory name must be unique");
 		})
+		.custom((val, { req }) => {
+			req.body.slug = slugify(val);
+			return true;
+		})
 		.isLength({ min: 2 })
 		.withMessage("Too short subCategory name")
 		.isLength({ max: 32 })
@@ -25,7 +30,12 @@ const createSubCategoryValidator = [
 
 const updateSubCategoryValidator = [
 	check("id").isMongoId().withMessage("Invalid subCategory id format"),
-	check("name").notEmpty(),
+	check("name")
+		.optional()
+		.custom((val, { req }) => {
+			req.body.slug = slugify(val);
+			return true;
+		}),
 	validatorMiddleware,
 ];
 

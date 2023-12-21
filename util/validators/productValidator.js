@@ -128,6 +128,12 @@ const createProductValidator = [
 
 const updateProductValidator = [
 	check("id").isMongoId().withMessage("Invalid product id format"),
+	check("title")
+		.optional()
+		.custom((title, { req }) => {
+			req.body.slug = slugify(title);
+			return true;
+		}),
 	validatorMiddleware,
 ];
 
