@@ -1,7 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../util/apiError");
 const ApiFeatures = require("../util/ApiFeatures");
-const { model } = require("mongoose");
 
 const deleteOne = (Model) =>
 	asyncHandler(async (req, res, next) => {
