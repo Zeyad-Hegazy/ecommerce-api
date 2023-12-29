@@ -9,6 +9,8 @@ const {
 	createProduct,
 	updateProduct,
 	deleteProduct,
+	uploadProductImages,
+	resizeProductImages,
 } = require("../controllers/ProductController");
 
 const {
@@ -21,7 +23,12 @@ const {
 router
 	.route("/")
 	.get(setFilterObject, getProducts)
-	.post(createProductValidator, createProduct);
+	.post(
+		uploadProductImages,
+		resizeProductImages,
+		createProductValidator,
+		createProduct
+	);
 
 router
 	.route("/:id")
